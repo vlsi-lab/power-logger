@@ -192,20 +192,14 @@ def main(argv=None) -> None:
         sys.exit(f"[ERROR]: Sketch {sketch_path} not found.")
 
     try:
-        c_kwargs = dict(
-            sketch = sketch_path,
-            fqbn = args.fqbn,
-            target_board = args.target_board,
-            ext_trigger = args.ext_trigger,
-        )
+        c_kwargs = dict(sketch = sketch_path, fqbn = args.fqbn, target_board = args.target_board, ext_trigger = args.ext_trigger)
         compile_sketch(**c_kwargs)
 
         port = args.port or autodetect_port()
         upload_sketch(sketch_path, args.fqbn, port)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        csv_path = (Path(args.log).expanduser().with_suffix(".csv")
-                     if args.log else Path(f"power_log_{timestamp}.csv"))
+        csv_path = (Path(args.log).expanduser().with_suffix(".csv") if args.log else Path(f"power_log_{timestamp}.csv"))
 
         read_serial_and_log(port, csv_path)
 
