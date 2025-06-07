@@ -21,11 +21,11 @@ The system pairs a tiny **Arduino® Nano 33 BLE** (or a compatible 3 V MCU) with
 ## Wiring Overview
 
 ~~~text
-Nano 33 BLE              ZCU10x Pmod I²C Header¹           Notes
+Nano 33 BLE              ZCU10x Pmod I²C                   Notes
 ---------------------    -------------------------------   ------------------------------
 GND      ─────────────►  GND 
-SDA (D20)─────────────►  SDA
-SCL (D21)─────────────►  SCL
+SDA (A4) ─────────────►  SDA
+SCL (A5) ─────────────►  SCL
 D2       ─────────────►  EXT_TRIG (optional)               Align logs with PS/PL events
 ~~~
 
