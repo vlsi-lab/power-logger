@@ -112,8 +112,8 @@ Adjust them if you replace the shunt resistors.
 
 ## Authors
 
-* Christian Conti  
-* Alessandro Varaldi  
+* Christian Conti (@Christian-Conti), @vlsi-lab 
+* Alessandro Varaldi (@AlessandroVaraldi), @vlsi-lab 
 
 ---
 
