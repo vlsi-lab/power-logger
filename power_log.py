@@ -175,7 +175,7 @@ def read_serial_and_log(port: str, csv_path: Path) -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog = "power_log.py", description = "Log and monitor power on ZCU102/ZCU106 platforms" )
-    parser.add_argument("-s", "--sketch", default=".src/power-logger.ino", help="Sketch directory or .ino file (default: ./power.ino)")
+    parser.add_argument("-s", "--sketch", default="./src/src.ino", help="Sketch directory or .ino file (default: ./power.ino)")
     parser.add_argument("-b", "--target-board", default="ZCU106", choices=["ZCU102", "ZCU106"], help="Target board (default: ZCU106)")
     parser.add_argument("--fqbn", default="arduino:mbed:nano33ble", help="Fully-Qualified Board Name")
     parser.add_argument("-p", "--port", help="Serial port (auto-detect if omitted)")
