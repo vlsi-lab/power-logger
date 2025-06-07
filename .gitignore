@@ -1,0 +1,15 @@
+# Arduino build folders
+build/
+*.elf
+*.hex
+
+# Python
+__pycache__/
+*.pyc
+
+# CSV logs
+*.csv
+
+# OS
+.DS_Store
+Thumbs.db
