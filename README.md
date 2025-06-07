@@ -112,8 +112,8 @@ Adjust them if you replace the shunt resistors.
 
 ## Authors
 
-* Christian Conti (@Christian-Conti), @vlsi-lab 
-* Alessandro Varaldi (@AlessandroVaraldi), @vlsi-lab 
+* [Christian Conti](https://github.com/Christian-Conti], [VLSI Lab](https://github.com/vlsi-lab)
+* [Alessandro Varaldi](https://github.com/AlessandroVaraldi), [VLSI Lab](https://github.com/vlsi-lab)
 
 ---
 
