@@ -91,7 +91,7 @@ plt.show()
 
 ## Calibration & Boards
 
-Default calibration words and LSBs for each rail/board live in `INA226.h` :contentReference[oaicite:2]{index=2}.  
+Default calibration words and LSBs for each rail/board live in `INA226.h`.  
 Adjust them if you replace the shunt resistors.
 
 ---
