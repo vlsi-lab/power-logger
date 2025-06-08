@@ -44,9 +44,9 @@ def autodetect_port() -> str:
             return p.device
 
     if not ports:
-        raise RuntimeError("[ERROR]: No serial ports found.")
+        raise RuntimeError("No serial ports found.")
 
-    msg = ("[WARNING]: Unable to auto-detect an Arduino on serial port.\n"
+    msg = ("Unable to auto-detect an Arduino on serial port.\n"
            "Detected serial ports:\n  "
            + "\n  ".join(f"{p.device}: {p.description}" for p in ports)
            + "\nSpecify the port manually with --port")
@@ -72,14 +72,14 @@ def compile_sketch(**kwargs) -> None:
     try:
         subprocess.run(cmd, check=True, text=True)
     except FileNotFoundError as exc:
-        raise RuntimeError("[ERROR]: arduino-cli not found.") from exc
+        raise RuntimeError("arduino-cli not found.") from exc
 
 
 def upload_sketch(sketch: Path, fqbn: str, port: str) -> None:
     try:
       subprocess.run( ["arduino-cli", "upload", "-p", port, "--fqbn", fqbn, str(sketch)], check=True, text=True)
     except FileNotFoundError as exc:
-        raise RuntimeError("[ERROR]: arduino-cli not found.") from exc
+        raise RuntimeError("arduino-cli not found.") from exc
 
 
 def _write_header(writer: csv.writer, field_count: int) -> None:
@@ -175,7 +175,7 @@ def read_serial_and_log(port: str, csv_path: Path) -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog = "power_log.py", description = "Log and monitor power on ZCU102/ZCU106 platforms" )
-    parser.add_argument("-s", "--sketch", default="./src/src.ino", help="Sketch directory or .ino file (default: ./power.ino)")
+    parser.add_argument("-s", "--sketch", default="./src/src.ino", help="Sketch directory or .ino file (default: ./src.ino)")
     parser.add_argument("-b", "--target-board", default="ZCU106", choices=["ZCU102", "ZCU106"], help="Target board (default: ZCU106)")
     parser.add_argument("--fqbn", default="arduino:mbed:nano33ble", help="Fully-Qualified Board Name")
     parser.add_argument("-p", "--port", help="Serial port (auto-detect if omitted)")

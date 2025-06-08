@@ -25,12 +25,14 @@ float pwr_pl = 0;
 
 volatile byte trigger = LOW; 
 
+INA226 *ina;
+
 #if defined(BOARD_ZCU106)
   INA226 *ina = new INA226(ZCU106); 
 #elif defined(BOARD_ZCU102)
   INA226 *ina = new INA226(ZCU102);
 #else  
-  digitalWrite(LED_BUILTIN, HIGH);
+  INA226 *ina = new INA226(ZCU106); 
 #endif
 
 #ifdef EXT_TRIGGER
