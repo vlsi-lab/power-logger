@@ -94,7 +94,7 @@ If the pin goes HIGH again later, the script opens a new CSV file with an update
 
 Each HIGH pulse on the external pin therefore corresponds to a separate log file, making it easy to analyze individual events.```
 
-
+---
 
 ### Visualise
 
