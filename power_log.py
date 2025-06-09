@@ -16,7 +16,6 @@
 
 import argparse
 import csv
-import os
 import subprocess
 import sys
 import time
@@ -24,14 +23,12 @@ import serial
 from serial.tools import list_ports
 from datetime import datetime
 from pathlib import Path
-from types import SimpleNamespace
-from typing import List
 
 UPLOAD_DELAY = 2
 BAUD = 2_000_000
+SPINNER = ["|", "/", "-", "\\"]
 
 verbose = False 
-spinner = ["|", "/", "-", "\\"]
 
 def autodetect_port() -> str:
     """Return first serial port mentioning 'Arduino'; else raise."""
@@ -40,7 +37,7 @@ def autodetect_port() -> str:
     for p in ports:
         if "Arduino" in (p.manufacturer or "") or "Arduino" in (p.description or ""):
             if verbose:
-                print(f"[INFO] Auto-detected Arduino on {p.device}")
+                print(f"[INFO]: Auto-detected Arduino on {p.device}")
 
             return p.device
 
@@ -56,11 +53,11 @@ def autodetect_port() -> str:
 
 
 def compile_sketch(**kwargs) -> None:
-    fqbn         = kwargs["fqbn"]
-    sketch       = kwargs["sketch"]
+    fqbn = kwargs["fqbn"]
+    sketch = kwargs["sketch"]
     target_board = kwargs["target_board"]
 
-    flags  = f"-DBOARD_{target_board} "
+    flags = f"-DBOARD_{target_board} "
     flags += "-DEXT_TRIGGER " if kwargs["ext_trigger"] else ""
 
     cmd = ["arduino-cli", "compile", "--fqbn", fqbn,
@@ -68,7 +65,7 @@ def compile_sketch(**kwargs) -> None:
         str(sketch)]
 
     if verbose:
-        print("[CMD]", " ".join(cmd))
+        print("[CMD]:", " ".join(cmd))
 
     try:
         subprocess.run(cmd, check=True, text=True)
@@ -87,28 +84,28 @@ def _write_header(writer: csv.writer, field_count: int) -> None:
     writer.writerow([f"value{i+1}" for i in range(field_count)])
 
 
-def read_serial_and_log(port: str, csv_path: Path) -> None:
+def read_serial_and_log(port: str, csv_path: Path, ext_trigger: bool = False) -> None:
     if verbose:
         print(f"[INFO]: Opening {port} @ {BAUD} (Ctrl-C to exit)")
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    base_stem      = csv_path.stem
-    suffix         = csv_path.suffix
+    base_stem = csv_path.stem
+    suffix = csv_path.suffix
 
-    current_f      = None
-    writer         = None
+    current_f = None
+    writer = None
     header_written = False
-    max_fields     = 0
+    max_fields = 0
+    spinner_idx = 0
 
     with serial.Serial(port, BAUD, timeout=None) as ser:
         time.sleep(UPLOAD_DELAY)
         try:
-            spin = 0
             while True:
                 if not verbose:
+                    sys.stdout.write(f"\r[INFO]: Running... {SPINNER[spinner_idx]}")
                     sys.stdout.flush()
-                    sys.stdout.write(f"\r[INFO]: Running... {spinner[spin]}")
-                    spin = (spin + 1) % len(spinner)
+                    spinner_idx = (spinner_idx + 1) % len(SPINNER)
 
                 line_bytes = ser.readline()
                 if not line_bytes:
@@ -131,32 +128,33 @@ def read_serial_and_log(port: str, csv_path: Path) -> None:
                     continue
 
                 if line == "#STOP":
-                    if current_f is not None:
+                    if current_f:
                         current_f.close()
-                        current_f = None
-                        writer = None
                         if verbose:
                             print(f"\n[INFO]: STOP logging")
+                    current_f = None
+                    writer = None
                     continue
                 # -----------------------------------------------------------------------
 
                 # Fallback: if no START received, open base file once
-                if writer is None:
+                if not ext_trigger and writer is None:
                     current_f = csv_path.open("a", newline="", encoding="utf-8")
                     writer = csv.writer(current_f)
                     header_written = current_f.tell() != 0
                     max_fields = 0
 
+                if writer is None:
+                    if verbose:
+                        print("[ERROR]: No writer available, cannot log data.")
+                    continue
+
                 values = line.split("\t")
                 field_count = len(values)
-
-                if not header_written:
-                    max_fields = field_count
+                if not header_written or field_count > max_fields:
+                    max_fields = max(max_fields, field_count)
                     _write_header(writer, max_fields)
                     header_written = True
-                elif field_count > max_fields:
-                    max_fields = field_count
-                    _write_header(writer, max_fields)
 
                 padded = values + [""] * (max_fields - field_count)
                 writer.writerow(padded)
@@ -165,10 +163,10 @@ def read_serial_and_log(port: str, csv_path: Path) -> None:
                 if verbose:
                     print(f"{line}")
 
+        except serial.SerialException as exc:
+            print(f"\n[ERROR]: Serial error: {exc}")
         except KeyboardInterrupt:
-            print("")
-            if verbose:
-                print("[INFO]: Power logger stopped by user")
+            print("\n[INFO]: Power logger stopped by user")
         finally:
             if current_f is not None:
                 current_f.close()
@@ -178,9 +176,9 @@ def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog = "power_log.py", description = "Log and monitor power on ZCU102/ZCU106 platforms" )
     parser.add_argument("-s", "--sketch", default="./src/src.ino", help="Sketch directory or .ino file (default: ./src/src.ino)")
     parser.add_argument("-b", "--target-board", default="ZCU106", choices=["ZCU102", "ZCU106"], help="Target board (default: ZCU106)")
-    parser.add_argument("--fqbn", default="arduino:mbed:nano33ble", help="Fully-Qualified Board Name")
+    parser.add_argument("-a", "--arduino-board", default="arduino:mbed:nano33ble", help="Target Arduino (default: arduino:mbed:nano33ble)")
     parser.add_argument("-p", "--port", help="Serial port (auto-detect if omitted)")
-    parser.add_argument("--log", help="CSV output path (default: power_log_<timestamp>.csv)")
+    parser.add_argument("-d", "--dst", default="./logs", help="CSV output path (default: ./logs/power_log_<timestamp>.csv)")
     parser.add_argument("-t", "--ext-trigger", action="store_true", help="Start/stop sampling on external trigger")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args(argv)
@@ -200,22 +198,17 @@ def main(argv=None) -> None:
         upload_sketch(sketch_path, args.fqbn, port)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        csv_path = (Path(args.log).expanduser().with_suffix(".csv") if args.log else Path(f"power_log_{timestamp}.csv"))
+        csv_name = f"power_log_{timestamp}.csv"
+        log_dir = Path(args.dst).expanduser().resolve()
+        log_dir.mkdir(parents=True, exist_ok=True)
 
-        csv_folder = "./logs/"
-        # Ensure the logs directory exists and create it if not
-        if not csv_folder.exists():
-            os.makedirs(csv_folder, exist_ok=True)
-        
-        csv_path = os.path.join(csv_folder, csv_path)
-
-        read_serial_and_log(port, csv_path)
+        csv_path = log_dir / csv_name
+        read_serial_and_log(port, csv_path, ext_trigger=args.ext_trigger)
 
     except subprocess.CalledProcessError as exc:
         sys.exit(f"[ERROR]: Command failed with exit code {exc.returncode}")
     except Exception as exc:
-        sys.exit(f"[ERROR]: {exc}")
-
+        sys.exit(f"\n[ERROR]: {exc}")
 
 if __name__ == "__main__":
     main()
