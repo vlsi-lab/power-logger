@@ -18,20 +18,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "INA226.h"
 
-#define IT_PIN 2
-
 float pwr_ps = 0;
 float pwr_pl = 0;
 
 volatile byte trigger = LOW; 
 
-#if defined(BOARD_ZCU106)
-  INA226 *ina = new INA226(ZCU106); 
-#elif defined(BOARD_ZCU102)
-  INA226 *ina = new INA226(ZCU102);
-#else  
-  INA226 *ina = new INA226(ZCU106); 
-#endif
+INA226 *ina; 
 
 #ifdef EXT_TRIGGER
   constexpr uint8_t TRIGGER_PIN = 2;
@@ -45,6 +37,14 @@ void setup() {
 
   #ifdef EXT_TRIGGER
     pinMode(TRIGGER_PIN, INPUT);
+  #endif
+  
+  #if defined(BOARD_ZCU106)
+    ina = new INA226(ZCU106); 
+  #elif defined(BOARD_ZCU102)
+    ina = new INA226(ZCU102);
+  #else  
+    digitalWrite(LED_BUILTIN, HIGH); 
   #endif
 
   delay(1000);
