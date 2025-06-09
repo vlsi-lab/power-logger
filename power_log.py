@@ -178,7 +178,7 @@ def main(argv=None) -> None:
     parser.add_argument("-b", "--target-board", default="ZCU106", choices=["ZCU102", "ZCU106"], help="Target board (default: ZCU106)")
     parser.add_argument("-a", "--arduino-board", default="arduino:mbed:nano33ble", help="Target Arduino (default: arduino:mbed:nano33ble)")
     parser.add_argument("-p", "--port", help="Serial port (auto-detect if omitted)")
-    parser.add_argument("-d", "--dst", default="./logs", help="CSV output path (default: ./logs/power_log_<timestamp>.csv)")
+    parser.add_argument("-d", "--dst", default="./logs", help="CSV output dir (default: ./logs)")
     parser.add_argument("-t", "--ext-trigger", action="store_true", help="Start/stop sampling on external trigger")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args(argv)
