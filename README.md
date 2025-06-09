@@ -103,7 +103,7 @@ When the trigger pin returns to LOW, the script closes the current CSV file.
 4. **Subsequent HIGH pulses**  
 If the pin goes HIGH again later, the script opens a new CSV file with an updated timestamp and repeats the process.
 
-Each HIGH pulse on the external pin therefore corresponds to a separate log file, making it easy to analyze individual events.```
+Each HIGH pulse on the external pin therefore corresponds to a separate log file, making it easy to analyze individual events.
 
 ---
 
