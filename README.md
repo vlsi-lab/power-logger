@@ -1,7 +1,7 @@
 # Power Logger for Xilinx ZCU102 / ZCU106
 
 A lightweight hardware + software toolkit for high-resolution power monitoring on Xilinx Zynq UltraScale+ evaluation boards.  
-The system pairs a tiny **Arduino® Nano 33 BLE** (or a compatible 3 V MCU) with **TI INA226** current/voltage monitors—multiplexed through a **TCA9548A**—to capture rail-power data and stream it as CSV to a host PC.
+The system pairs a tiny **Arduino® Nano 33 BLE** (or a compatible 3 V MCU) with **TI INA226** current/voltage monitors—multiplexed through a **PCA9544ARGYR**—to capture rail-power data and stream it as CSV to a host PC.
 
 > **Why?** When benchmarking FPGA workloads you often need a cheap, non-intrusive way to correlate board power with software events.  
 > This project lets you do that with off-the-shelf parts and a single Python command.
