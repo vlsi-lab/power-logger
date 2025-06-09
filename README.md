@@ -55,7 +55,7 @@ cd power-logger
 ### Build & Upload the Firmware
 
 ~~~bash
-python power_log.py --target-board ZCU106 --fqbn arduino:mbed:nano33ble
+python power_log.py --target-board ZCU106 --arduino-board arduino:mbed:nano33ble
 ~~~
 
 Use `--port` to override auto-detection, and `--ext-trigger` if you wired **D2** to an external 3 V-logic source.
@@ -67,8 +67,7 @@ Use `--port` to override auto-detection, and `--ext-trigger` if you wired **D2**
 python power_log.py
 ~~~
 
-When `--ext-trigger` is active the logger waits for a HIGH pulse on **D2**:  
-*first pulse → `#START`, second pulse → `#STOP`, and so on*.
+When `--ext-trigger` is active the logger works only if pin D2 is HIGH.
 
 ### Visualise
 
@@ -103,7 +102,7 @@ When the trigger pin returns to LOW, the script closes the current CSV file.
 4. **Subsequent HIGH pulses**  
 If the pin goes HIGH again later, the script opens a new CSV file with an updated timestamp and repeats the process.
 
-Each HIGH pulse on the external pin therefore corresponds to a separate log file, making it easy to analyze individual events.```
+Each HIGH pulse on the external pin therefore corresponds to a separate log file, making it easy to analyze individual events.
 
 ---
 
