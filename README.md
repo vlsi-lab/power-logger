@@ -67,8 +67,7 @@ Use `--port` to override auto-detection, and `--ext-trigger` if you wired **D2**
 python power_log.py
 ~~~
 
-When `--ext-trigger` is active the logger waits for a HIGH pulse on **D2**:  
-*first pulse → `#START`, second pulse → `#STOP`, and so on*.
+When `--ext-trigger` is active the logger works only if pin D2 is HIGH.
 
 ### Visualise
 
