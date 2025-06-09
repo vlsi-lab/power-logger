@@ -16,6 +16,7 @@
 
 import argparse
 import csv
+import os
 import subprocess
 import sys
 import time
@@ -200,6 +201,13 @@ def main(argv=None) -> None:
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         csv_path = (Path(args.log).expanduser().with_suffix(".csv") if args.log else Path(f"power_log_{timestamp}.csv"))
+
+        csv_folder = "./logs"
+        # Ensure the logs directory exists and create it if not
+        if not csv_folder.exists():
+            os.makedirs(csv_folder, exist_ok=True)
+        
+        csv_path = os.path.join(csv_folder, csv_path)
 
         read_serial_and_log(port, csv_path)
 
