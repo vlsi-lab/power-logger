@@ -55,7 +55,7 @@ cd power-logger
 ### Build & Upload the Firmware
 
 ~~~bash
-python power_log.py --target-board ZCU106 --fqbn arduino:mbed:nano33ble
+python power_log.py --target-board ZCU106 --arduino-board arduino:mbed:nano33ble
 ~~~
 
 Use `--port` to override auto-detection, and `--ext-trigger` if you wired **D2** to an external 3 V-logic source.
