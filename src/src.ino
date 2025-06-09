@@ -21,51 +21,56 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 float pwr_ps = 0;
 float pwr_pl = 0;
 
-volatile byte trigger = LOW; 
-
-INA226 *ina; 
+INA226 *ina;
 
 #ifdef EXT_TRIGGER
-  constexpr uint8_t TRIGGER_PIN = 2;
-  bool lastTrigState = LOW;
-  bool logging = false;
+  constexpr uint8_t TRIGGER_PIN = 2;          // interrupt capable pin
+  volatile bool logging = false;        
+  volatile bool interrupt  = false;     
+#endif
+
+#ifdef EXT_TRIGGER
+  void triggerISR() {
+    logging = digitalRead(TRIGGER_PIN);
+    interrupt = true;                  
+  }
 #endif
 
 void setup() {
-  Serial.begin(2000000);
+  Serial.begin(2'000'000);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  #ifdef EXT_TRIGGER
-    pinMode(TRIGGER_PIN, INPUT);
-  #endif
-  
-  #if defined(BOARD_ZCU106)
-    ina = new INA226(ZCU106); 
-  #elif defined(BOARD_ZCU102)
-    ina = new INA226(ZCU102);
-  #else  
-    digitalWrite(LED_BUILTIN, HIGH); 
-  #endif
+#ifdef EXT_TRIGGER
+  pinMode(TRIGGER_PIN, INPUT);               
+  attachInterrupt(digitalPinToInterrupt(TRIGGER_PIN), triggerISR, CHANGE);
+#endif
+
+#if defined(BOARD_ZCU106)
+  ina = new INA226(ZCU106);
+#elif defined(BOARD_ZCU102)
+  ina = new INA226(ZCU102);
+#else
+  digitalWrite(LED_BUILTIN, HIGH);
+#endif
 
   delay(1000);
-
 }
 
-void loop() { 
+void loop() {
+#ifdef EXT_TRIGGER
+  if (interrupt) {
+    noInterrupts();
+    bool current = logging;
+    interrupt = false;
+    interrupts();
+    Serial.println(current ? F("#START") : F("#STOP"));
+  }
 
-  #ifdef EXT_TRIGGER
-    const bool trigState = digitalRead(TRIGGER_PIN);
-    if (trigState == HIGH && lastTrigState == LOW) {
-        logging = !logging;
-        Serial.println(logging ? "#START" : "#STOP");
-    }
-    lastTrigState = trigState;
-
-    if (!logging) {
-        delay(1);
-        return;
-    }
-  #endif
+  if (!logging) {
+    delayMicroseconds(1);
+    return;
+  }
+#endif
 
   pwr_ps = ina->get_pwr(PS);
   pwr_pl = ina->get_pwr(PL);
