@@ -77,6 +77,9 @@ import pandas as pd, matplotlib.pyplot as plt
 df = pd.read_csv("power_log_2025-06-07_12-15-42.csv")
 df.plot()
 plt.show()
+~~~
+
+---
 
 ## External Trigger Functionality
 
