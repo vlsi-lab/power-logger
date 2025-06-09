@@ -70,6 +70,14 @@ python power_log.py
 When `--ext-trigger` is active the logger waits for a HIGH pulse on **D2**:  
 *first pulse → `#START`, second pulse → `#STOP`, and so on*.
 
+### Visualise
+
+~~~python
+import pandas as pd, matplotlib.pyplot as plt
+df = pd.read_csv("power_log_2025-06-07_12-15-42.csv")
+df.plot()
+plt.show()
+
 ## External Trigger Functionality
 
 When running the script with the `--ext-trigger` flag, the logger listens on a dedicated input pin and manages log files as follows:
@@ -93,17 +101,6 @@ When the trigger pin returns to LOW, the script closes the current CSV file.
 If the pin goes HIGH again later, the script opens a new CSV file with an updated timestamp and repeats the process.
 
 Each HIGH pulse on the external pin therefore corresponds to a separate log file, making it easy to analyze individual events.```
-
----
-
-### Visualise
-
-~~~python
-import pandas as pd, matplotlib.pyplot as plt
-df = pd.read_csv("power_log_2025-06-07_12-15-42.csv")
-df.plot()
-plt.show()
-~~~
 
 ---
 
