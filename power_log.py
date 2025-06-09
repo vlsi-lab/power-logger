@@ -119,7 +119,7 @@ def read_serial_and_log(port: str, csv_path: Path) -> None:
 
                 # Handle trigger markers ------------------------------------------------
                 if line == "#START":
-                    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.%f")[:-3]
                     current_path = csv_path.with_name(f"{base_stem}_{timestamp}{suffix}")
                     current_f = current_path.open("w", newline="", encoding="utf-8")
                     writer = csv.writer(current_f)
