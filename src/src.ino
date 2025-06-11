@@ -40,37 +40,37 @@ void setup() {
   Serial.begin(2'000'000);
   pinMode(LED_BUILTIN, OUTPUT);
 
-#ifdef EXT_TRIGGER
-  pinMode(TRIGGER_PIN, INPUT);               
-  attachInterrupt(digitalPinToInterrupt(TRIGGER_PIN), triggerISR, CHANGE);
-#endif
+  #ifdef EXT_TRIGGER
+    pinMode(TRIGGER_PIN, INPUT);               
+    attachInterrupt(digitalPinToInterrupt(TRIGGER_PIN), triggerISR, CHANGE);
+  #endif
 
-#if defined(BOARD_ZCU106)
-  ina = new INA226(ZCU106);
-#elif defined(BOARD_ZCU102)
-  ina = new INA226(ZCU102);
-#else
-  digitalWrite(LED_BUILTIN, HIGH);
-#endif
+  #if defined(BOARD_ZCU106)
+    ina = new INA226(ZCU106);
+  #elif defined(BOARD_ZCU102)
+    ina = new INA226(ZCU102);
+  #else
+    digitalWrite(LED_BUILTIN, HIGH);
+  #endif
 
   delay(1000);
 }
 
 void loop() {
-#ifdef EXT_TRIGGER
-  if (interrupt) {
-    noInterrupts();
-    bool current = logging;
-    interrupt = false;
-    interrupts();
-    Serial.println(current ? F("#START") : F("#STOP"));
-  }
+  #ifdef EXT_TRIGGER
+    if (interrupt) {
+      noInterrupts();
+      bool current = logging;
+      interrupt = false;
+      interrupts();
+      Serial.println(current ? F("#START") : F("#STOP"));
+    }
 
-  if (!logging) {
-    delayMicroseconds(1);
-    return;
-  }
-#endif
+    if (!logging) {
+      delayMicroseconds(1);
+      return;
+    }
+  #endif
 
   pwr_ps = ina->get_pwr(PS);
   pwr_pl = ina->get_pwr(PL);

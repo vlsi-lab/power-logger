@@ -52,13 +52,13 @@ static const float lsb_val[NUM_SENS][2] = {{0.0003052, 0.0005}, {0.0003052, 0.00
 class INA226 {
 public:
     // Constructor with default address
-    explicit INA226(const board_typeDef &board, TwoWire *wire = &Wire);
+    explicit INA226(board_typeDef &board, TwoWire *wire = &Wire);
     // Constructor with non-default address 
-    explicit INA226(const uint8_t &addr, const board_typeDef &board, TwoWire *wire = &Wire);
+    explicit INA226(uint8_t &addr, board_typeDef &board, TwoWire *wire = &Wire);
     
-    const float get_pwr(const sensor_typeDef &sensor);
-    const void set_I2C_speed(const uint16_t &speed);
-    const void set_addr(const uint8_t &addr);
+    float get_pwr(sensor_typeDef &sensor);
+    void set_I2C_speed(uint16_t &speed);
+    void set_addr(uint8_t &addr);
 
 private:
 
@@ -66,9 +66,9 @@ private:
     board_typeDef _board;
     TwoWire * _wire;
 
-    const void _sel_sensor(const sensor_typeDef &sensor);
-    const int8_t _write_reg(const uint8_t &reg, const uint16_t &val);
-    int32_t _read_reg(const uint8_t &reg);
+    int8_t _sel_sensor(sensor_typeDef &sensor);
+    int8_t _write_reg(uint8_t &reg, uint16_t &val);
+    int32_t _read_reg(uint8_t &reg);
 };
 
 #endif // INA226_H

@@ -16,51 +16,67 @@
 
 #include "INA226.h"
 
-INA226::INA226(const board_typeDef &board, TwoWire *wire)
+constexpr uint32_t I2C_SPEED_HIGH = 400000UL;
+constexpr uint32_t I2C_SPEED_LOW  = 100000UL;
+constexpr uint8_t  MUX_SENSOR_OFFSET = 0x04;
+constexpr float    POWER_LSB_SCALE = 25.0f;
+
+INA226::INA226(board_typeDef &board, TwoWire *wire)
     : _address(STD_ADDR),
       _board(board),
       _wire(wire)
 {
     _wire->begin();
-    set_I2C_speed(400000UL);
+    set_I2C_speed(I2C_SPEED_HIGH);
+    // Set default calibration registers for each sensor
     for (int i = 0; i < NUM_SENS; i++) { 
         _sel_sensor((sensor_typeDef)i);
         _write_reg(CAL_REG, cal_reg[_board][i]); 
     }
 }
 
-INA226::INA226(const uint8_t &addr, const board_typeDef &board, TwoWire *wire)
+INA226::INA226(uint8_t &addr, board_typeDef &board, TwoWire *wire)
     : _address(addr),
       _board(board),
       _wire(wire)
 {
     _wire->begin();
     set_I2C_speed(400000UL);
+    // Set the calibration register for each sensor
     for (int i = 0; i < NUM_SENS; i++) { 
         _sel_sensor((sensor_typeDef)i);
         _write_reg(CAL_REG, cal_reg[_board][i]); 
     }
 }
 
-const void INA226::set_I2C_speed(const uint16_t &speed) {
-    _wire->setClock((speed == 400000UL) ? 400000UL : 100000UL);
+void INA226::set_I2C_speed(uint16_t &speed) {
+    _wire->setClock((speed == I2C_SPEED_HIGH) ? I2C_SPEED_HIGH : I2C_SPEED_LOW);
 }
 
-const void INA226::set_addr(const uint8_t &addr) { _address = addr; }
-
-const float INA226::get_pwr(const sensor_typeDef &sensor) {
-    _sel_sensor(sensor);
-    float pwr = (float)_read_reg(PWR_REG) * (lsb_val[_board][sensor] * 25);
-    return pwr;
+void INA226::set_addr(uint8_t &addr) { 
+    _address = addr; 
 }
 
-const void INA226::_sel_sensor(const sensor_typeDef &sensor) {
+float INA226::get_pwr(sensor_typeDef sensor) {
+    if (_sel_sensor(sensor) != 0) {
+        return -1.0f;
+    }
+
+    int32_t raw_value = _read_reg(PWR_REG);
+    if (raw_value < 0) {
+        return -1.0f;
+    }
+
+    return static_cast<float>(raw_value) * (lsb_val[_board][sensor] * POWER_LSB_SCALE);
+}
+
+int8_t INA226::_sel_sensor(sensor_typeDef sensor) {
     _wire->beginTransmission(MUX_ADDR);
-    _wire->write(sensor + 0x04);
-    _wire->endTransmission();
+    _wire->write(sensor + MUX_SENSOR_OFFSET);
+    return _wire->endTransmission();
 }
 
-const int8_t INA226::_write_reg(const uint8_t &reg, const uint16_t &val) {
+int8_t INA226::_write_reg(uint8_t &reg, uint16_t &val) {
     int8_t ret = 0;
     _wire->beginTransmission(_address);
     _wire->write(reg);
@@ -70,20 +86,21 @@ const int8_t INA226::_write_reg(const uint8_t &reg, const uint16_t &val) {
     return ret;
 }
 
-int32_t INA226::_read_reg(const uint8_t &reg) {
-    int8_t ret = 0;
-    uint16_t val = 0;
-
+int32_t INA226::_read_reg(uint8_t reg) {
     _wire->beginTransmission(_address);
     _wire->write(reg);
-    ret = _wire->endTransmission();
-
-    if (ret == 0) {
-        if (_wire->requestFrom(_address, (uint8_t)2) == 2) {
-            val = _wire->read();
-            val <<= 8;
-            val |= _wire->read();
-        } else { ret = -1; }
+    if (_wire->endTransmission() != 0) {
+        return -1;
     }
-    return (ret == -1 ? (int32_t)ret : (int32_t)val);
+
+    if (_wire->requestFrom(_address, static_cast<uint8_t>(2)) != 2) {
+        return -1;
+    }
+
+    uint16_t val = _wire->read();
+    val <<= 8;
+    val |= _wire->read();
+
+    return static_cast<int32_t>(val);
 }
+
