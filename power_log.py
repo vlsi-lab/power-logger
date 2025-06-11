@@ -53,14 +53,14 @@ def autodetect_port() -> str:
 
 
 def compile_sketch(**kwargs) -> None:
-    fqbn = kwargs["fqbn"]
+    arduino_board = kwargs["arduino_board"]
     sketch = kwargs["sketch"]
     target_board = kwargs["target_board"]
 
     flags = f"-DBOARD_{target_board} "
     flags += "-DEXT_TRIGGER " if kwargs["ext_trigger"] else ""
 
-    cmd = ["arduino-cli", "compile", "--fqbn", fqbn,
+    cmd = ["arduino-cli", "compile", "--fqbn", arduino_board,
         "--build-property", f"build.extra_flags={flags}",
         str(sketch)]
 
@@ -73,9 +73,9 @@ def compile_sketch(**kwargs) -> None:
         raise RuntimeError("arduino-cli not found.") from exc
 
 
-def upload_sketch(sketch: Path, fqbn: str, port: str) -> None:
+def upload_sketch(sketch: Path, arduino_board: str, port: str) -> None:
     try:
-      subprocess.run( ["arduino-cli", "upload", "-p", port, "--fqbn", fqbn, str(sketch)], check=True, text=True)
+        subprocess.run( ["arduino-cli", "upload", "-p", port, "--fqbn", arduino_board, str(sketch)], check=True, text=True)
     except FileNotFoundError as exc:
         raise RuntimeError("arduino-cli not found.") from exc
 
@@ -176,7 +176,7 @@ def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog = "power_log.py", description = "Log and monitor power on ZCU102/ZCU106 platforms" )
     parser.add_argument("-s", "--sketch", default="./src/src.ino", help="Sketch directory or .ino file (default: ./src/src.ino)")
     parser.add_argument("-b", "--target-board", default="ZCU106", choices=["ZCU102", "ZCU106"], help="Target board (default: ZCU106)")
-    parser.add_argument("-a", "--arduino-board", default="arduino:mbed:nano33ble", help="Target Arduino (default: arduino:mbed:nano33ble)")
+    parser.add_argument("-a", "--arduino-board", dest="arduino_board", default="arduino:mbed:nano33ble", help="Target Arduino (default: arduino:mbed:nano33ble)")
     parser.add_argument("-p", "--port", help="Serial port (auto-detect if omitted)")
     parser.add_argument("-d", "--dst", default="./logs", help="CSV output dir (default: ./logs)")
     parser.add_argument("-t", "--ext-trigger", action="store_true", help="Start/stop sampling on external trigger")
@@ -191,11 +191,11 @@ def main(argv=None) -> None:
         sys.exit(f"[ERROR]: Sketch {sketch_path} not found.")
 
     try:
-        c_kwargs = dict(sketch = sketch_path, fqbn = args.fqbn, target_board = args.target_board, ext_trigger = args.ext_trigger)
+        c_kwargs = dict(sketch = sketch_path, arduino_board = args.arduino_board, target_board = args.target_board, ext_trigger = args.ext_trigger)
         compile_sketch(**c_kwargs)
 
         port = args.port or autodetect_port()
-        upload_sketch(sketch_path, args.fqbn, port)
+        upload_sketch(sketch_path, args.arduino_board, port)
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         csv_name = f"power_log_{timestamp}.csv"
