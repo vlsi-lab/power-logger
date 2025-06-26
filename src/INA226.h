@@ -45,9 +45,9 @@ typedef enum sensor {
 // Value of default calibration register for PS & PL, based on Xilinx SCUI SW
 // [ZCU102, ZCU106, ...]
 // [[PS, PL], ...]
-static const uint16_t cal_reg[NUM_BOARDS][2] = {{0x0D1B, 0x0800}, {0x0D1B, 0x0800}};
+static const uint16_t cal_reg[NUM_BOARDS][2] = {{0x0D1B, 0x0800}, {0x0800, 0x0831}};
 // LSB value obtained through datasheet
-static const float lsb_val[NUM_SENS][2] = {{0.0003052, 0.0005}, {0.0003052, 0.0005}};
+static const float lsb_val[NUM_SENS][2] = {{0.0003052, 0.00125}, {0.0005, 0.0012208}};
 
 class INA226 {
 public:
