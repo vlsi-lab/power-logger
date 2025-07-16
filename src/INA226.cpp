@@ -54,9 +54,15 @@ const float INA226::get_pwr(const sensor_typeDef &sensor) {
     return pwr;
 }
 
-const void INA226::_sel_sensor(const sensor_typeDef &sensor) {
+void INA226::_sel_sensor(uint8_t sensor) {
     _wire->beginTransmission(MUX_ADDR);
+#if defined(BOARD_ZCU106)
     _wire->write(sensor + 0x04);
+#elif defined(BOARD_ZCU102)
+    _wire->write(1 << sensor);
+#else
+    _wire->write(1 << sensor);
+#endif
     _wire->endTransmission();
 }
 
