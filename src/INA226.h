@@ -66,7 +66,7 @@ private:
     board_typeDef _board;
     TwoWire * _wire;
 
-    const void _sel_sensor(const sensor_typeDef &sensor);
+    void _sel_sensor(const sensor_typeDef &sensor);
     const int8_t _write_reg(const uint8_t &reg, const uint16_t &val);
     int32_t _read_reg(const uint8_t &reg);
 };
