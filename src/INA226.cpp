@@ -54,17 +54,21 @@ const float INA226::get_pwr(const sensor_typeDef &sensor) {
     return pwr;
 }
 
-void INA226::_sel_sensor(uint8_t sensor) {
+void INA226::_sel_sensor(const sensor_typeDef &sensor) {
     _wire->beginTransmission(MUX_ADDR);
-#if defined(BOARD_ZCU106)
-    _wire->write(sensor + 0x04);
+#ifdef BOARD_ZCU106
+    // ZCU106: PS→canale 2 (0x04), PL→canale 3 (0x05)
+    _wire->write(static_cast<uint8_t>(sensor) + 0x04);
 #elif defined(BOARD_ZCU102)
-    _wire->write(1 << sensor);
+    // ZCU102: PS→bus 0 (0x01), PL→bus 1 (0x02)
+    _wire->write(static_cast<uint8_t>(1 << static_cast<uint8_t>(sensor)));
 #else
-    _wire->write(1 << sensor);
+    // fallback generico: abilita sempre il bus corrispondente
+    _wire->write(static_cast<uint8_t>(1 << static_cast<uint8_t>(sensor)));
 #endif
     _wire->endTransmission();
 }
+
 
 const int8_t INA226::_write_reg(const uint8_t &reg, const uint16_t &val) {
     int8_t ret = 0;
